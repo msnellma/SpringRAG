@@ -6,5 +6,7 @@ To run, you need a `OPEN_API_KEY` environment variable, and start the PgVector D
 docker-compose up
 ```
 See `compose.yml` for database credentials.
+## Document ingestion
+Add documents to `src/resources/docs` and update the `IngestionService` class.
 ## API
 Send a request to `localhost:8080/chat` with a String query.
