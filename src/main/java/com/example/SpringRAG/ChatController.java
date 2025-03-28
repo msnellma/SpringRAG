@@ -2,12 +2,11 @@ package com.example.SpringRAG;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 
 @RestController
 public class ChatController {
@@ -21,10 +20,10 @@ public class ChatController {
     }
 
     @GetMapping("/chat")
-    public String chat(@RequestParam String query) {
+    public Flux<String> chat(@RequestParam String query) {
         return chatClient.prompt()
                 .user(query)
-                .call()
+                .stream()
                 .content();
     }
 }
