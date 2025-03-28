@@ -6,6 +6,8 @@ To run, you need a `OPEN_AI_KEY` environment variable, and start the PgVector Da
 docker-compose up
 ```
 See `compose.yml` for database credentials.
+
+Alternatively, start the application and the container should spin up.
 ## Document ingestion
 Add documents to `src/resources/docs` and update the `IngestionService` class.
 ## API
