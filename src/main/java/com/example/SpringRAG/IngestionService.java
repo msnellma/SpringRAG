@@ -10,6 +10,7 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,27 +20,29 @@ import java.util.Map;
 public class IngestionService implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(IngestionService.class);
     private final VectorStore vectorStore;
+    private final JdbcClient jdbcClient;
     @Value("classpath:/docs/document.pdf")
     private Resource myDoc;
 
-    public IngestionService(VectorStore vectorStore) {
+    public IngestionService(VectorStore vectorStore, JdbcClient jdbcClient) {
         this.vectorStore = vectorStore;
+        this.jdbcClient = jdbcClient;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        var pdfReader = new ParagraphPdfDocumentReader(myDoc);
-        TextSplitter textSplitter = new TokenTextSplitter();
+        Integer count = jdbcClient.sql("select count(*) from vector_store")
+                .query(Integer.class)
+                .single();
 
-        List<Document> splitDocumentChunks = textSplitter.apply(pdfReader.get());
+        if (count == 0) {
+            var pdfReader = new ParagraphPdfDocumentReader(myDoc);
+            TextSplitter textSplitter = new TokenTextSplitter();
 
-//        List<Document> documents = List.of(
-//                new Document("Spring AI rocks!! Spring AI rocks!! Spring AI rocks!! Spring AI rocks!! Spring AI rocks!!", Map.of("meta1", "meta1")),
-//                new Document("The World is Big and Salvation Lurks Around the Corner"),
-//                new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
+            List<Document> splitDocumentChunks = textSplitter.apply(pdfReader.get());
 
-
-        vectorStore.add(splitDocumentChunks);
-        log.info("VectorStore loaded with data.");
+            vectorStore.add(splitDocumentChunks);
+            log.info("VectorStore loaded with data.");
+        }
     }
 }
